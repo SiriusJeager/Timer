@@ -1,1 +1,1 @@
-# Timer
+# kegel-timer

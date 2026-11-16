@@ -1,0 +1,1142 @@
+/* ==========================================================
+   Kegel Timer — estilos
+   Dirección visual: instrumento deportivo. Superficies negras
+   neutras con bordes de 1px, un solo acento ("volt") reservado
+   para la elección y la acción, y color solo donde informa:
+   naranja = CONTRAER, turquesa = RELAJAR.
+
+   1. Fuentes y variables
+   2. Base
+   3. Componentes compartidos (botones, tarjetas)
+   4. Pantalla de bloqueo
+   5. Contenedor de la app y vistas
+   6. Vista Inicio
+   7. Vistas de cronómetro
+   8. Guía de instalación
+   9. Ajustes por tamaño de pantalla
+   ========================================================== */
+
+/* ---------- 1. Fuentes y variables ---------- */
+/* Fuentes guardadas en la propia app para que funcionen sin internet. */
+@font-face{
+  font-family:"Inter";
+  font-style:normal;
+  font-weight:400 800;
+  font-display:swap;
+  src:url("fonts/inter-latin.woff2") format("woff2");
+}
+
+@font-face{
+  font-family:"JetBrains Mono";
+  font-style:normal;
+  font-weight:500 800;
+  font-display:swap;
+  src:url("fonts/jetbrains-mono-latin.woff2") format("woff2");
+}
+
+:root{
+  color-scheme:dark;
+
+  /* superficies, de más profunda a más elevada */
+  --bg:#0a0b0c;
+  --surface:#131517;
+  --surface-2:#1c1f22;
+  --line:#2a2e32;          /* borde sutil de 1px */
+  --line-strong:#454b51;
+
+  /* texto */
+  --text:#f3f5f4;
+  --muted:#9ca3a0;
+
+  /* acento único: elección y acción */
+  --accent:#d6f24b;
+  --accent-ink:#0a0b0c;
+  --accent-wash:rgba(214, 242, 75, .09);
+
+  /* fases del ejercicio */
+  --contract:#ff7033;
+  --relax:#3fd9c6;
+  --danger:#ff6b5e;
+
+  --radius:14px;
+  --radius-sm:10px;
+
+  --font-ui:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-num:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --ease:cubic-bezier(.2, .8, .2, 1);
+  --press:120ms var(--ease);
+}
+
+/* ---------- 2. Base ---------- */
+*{
+  box-sizing:border-box;
+}
+
+html{
+  height:100%;
+  background:var(--bg);
+  -webkit-text-size-adjust:100%;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-ui);
+  font-feature-settings:"cv11", "ss03";
+  line-height:1.35;
+  overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+}
+
+::selection{
+  background:var(--accent);
+  color:var(--accent-ink);
+}
+
+h1, h2, h3, p{
+  margin:0;
+}
+
+button{
+  font:inherit;
+  color:inherit;
+  border:none;
+  background:none;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+button:focus-visible,
+input:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+svg{
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+/* ---------- 3. Componentes compartidos ---------- */
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:24px;
+}
+
+.btn{
+  min-height:60px;
+  padding:0 20px;
+  border:1px solid transparent;
+  border-radius:var(--radius);
+  font-size:17px;
+  font-weight:700;
+  letter-spacing:.01em;
+  transition:transform var(--press), background-color .2s var(--ease),
+             border-color .2s var(--ease), color .2s var(--ease);
+}
+
+.btn:active{
+  transform:scale(.97);
+}
+
+.btn-primary{
+  background:var(--accent);
+  color:var(--accent-ink);
+}
+
+.btn-primary:active{
+  background:#c2dd3c;
+}
+
+.btn-secondary{
+  background:var(--surface);
+  border-color:var(--line);
+  color:var(--text);
+}
+
+.btn-secondary:active{
+  background:var(--surface-2);
+  border-color:var(--line-strong);
+}
+
+.link-btn{
+  display:block;
+  width:100%;
+  min-height:44px;
+  padding:8px;
+  color:var(--muted);
+  font-size:13px;
+  text-decoration:underline;
+  text-decoration-color:var(--line-strong);
+  text-underline-offset:3px;
+  transition:color .2s var(--ease), text-decoration-color .2s var(--ease);
+}
+
+.link-btn:active{
+  color:var(--text);
+  text-decoration-color:var(--accent);
+}
+
+/* ---------- 4. Pantalla de bloqueo ---------- */
+.lock{
+  width:360px;
+  max-width:100%;
+  padding:16px;
+}
+
+.unlocked .lock{
+  display:none;
+}
+
+.lock-card{
+  display:grid;
+  gap:10px;
+  text-align:center;
+}
+
+.lock-card h1{
+  font-size:26px;
+  font-weight:800;
+  letter-spacing:-.02em;
+}
+
+.lock-icon{
+  margin:0 auto;
+  border-radius:16px;
+  border:1px solid var(--line);
+}
+
+.lock-text{
+  margin-bottom:8px;
+  color:var(--muted);
+  font-size:15px;
+}
+
+.lock-card label{
+  text-align:left;
+  font-size:13px;
+  font-weight:600;
+  color:var(--muted);
+}
+
+.lock-card input{
+  width:100%;
+  padding:14px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--line);
+  background:var(--bg);
+  color:var(--text);
+  caret-color:var(--accent);
+  font-family:var(--font-num);
+  font-size:16px; /* 16px evita que iOS haga zoom al enfocar */
+  font-weight:600;
+  text-align:center;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  transition:border-color .2s var(--ease);
+}
+
+.lock-card input:focus{
+  outline:none;
+  border-color:var(--accent);
+}
+
+.lock-card input::placeholder{
+  font-family:var(--font-ui);
+  font-weight:400;
+  letter-spacing:normal;
+  text-transform:none;
+  color:#7d8481;
+}
+
+.lock-error{
+  min-height:18px;
+  color:var(--danger);
+  font-size:13px;
+}
+
+.lock-hint{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+/* ---------- 5. Contenedor de la app y vistas ---------- */
+.app{
+  display:none;
+  width:100%;
+  max-width:520px;
+  height:100vh;
+  height:100dvh;
+  max-height:900px;
+  padding:max(16px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+          max(16px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+
+.unlocked .app{
+  display:flex;
+  flex-direction:column;
+}
+
+.view{
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow-y:auto;       /* solo actúa si la pantalla es extremadamente baja */
+  scrollbar-width:none;
+}
+
+.view::-webkit-scrollbar{
+  display:none;
+}
+
+.view[hidden]{
+  display:none;
+}
+
+/* ---------- 6. Vista Inicio ----------
+   Jerarquía: el nivel informa (silencioso), la duración se ajusta
+   (control secundario) y las tarjetas son la acción (lo más sólido). */
+.home{
+  gap:clamp(14px, 3.2dvh, 30px);
+  justify-content:center;
+}
+
+.home-header{
+  text-align:center;
+}
+
+.home-header h1{
+  font-size:clamp(26px, 4.4dvh, 34px);
+  font-weight:800;
+  letter-spacing:-.025em;
+}
+
+.home-header p{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:15px;
+}
+
+/* Nivel y barra de progreso */
+.level{
+  display:grid;
+  gap:8px;
+}
+
+.level-text{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:2px 12px;
+  font-size:13px;
+  font-variant-numeric:tabular-nums;
+  color:var(--muted);
+}
+
+.level-text strong{
+  font-size:14px;
+  font-weight:700;
+  color:var(--text);
+}
+
+.level-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.level-bar{
+  flex:1;
+  height:4px;
+  border-radius:2px;
+  background:var(--surface-2);
+  overflow:hidden;
+}
+
+.level-fill{
+  width:0;
+  height:100%;
+  border-radius:2px;
+  background:var(--accent);
+  transition:width .5s var(--ease);
+}
+
+.block-title{
+  margin-bottom:10px;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+.durations{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:8px;
+}
+
+/* .duration y .option comparten el mismo lenguaje de "chip" */
+.duration,
+.option{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border-radius:var(--radius-sm);
+  background:transparent;
+  border:1px solid var(--line);
+  transition:transform var(--press), background-color .2s var(--ease),
+             border-color .2s var(--ease), color .2s var(--ease);
+}
+
+.duration{
+  min-height:clamp(54px, 9dvh, 68px);
+}
+
+.duration strong,
+.option strong{
+  font-family:var(--font-num);
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+
+.duration strong{
+  font-size:21px;
+  line-height:1.1;
+}
+
+.duration span{
+  font-size:11px;
+  font-weight:500;
+  color:var(--muted);
+}
+
+.duration:active,
+.option:active{
+  transform:scale(.95);
+  background:var(--surface-2);
+}
+
+.duration[aria-checked="true"],
+.option[aria-checked="true"]{
+  background:var(--accent-wash);
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.duration[aria-checked="true"] span,
+.option[aria-checked="true"] span{
+  color:var(--accent);
+}
+
+.modes{
+  display:grid;
+  gap:12px;
+}
+
+.mode-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  padding:clamp(14px, 2.4dvh, 20px) 14px clamp(14px, 2.4dvh, 20px) 16px;
+  border-radius:var(--radius);
+  background:var(--surface);
+  border:1px solid var(--line);
+  text-align:left;
+  transition:transform var(--press), background-color .2s var(--ease),
+             border-color .2s var(--ease);
+}
+
+.mode-card:active{
+  transform:scale(.985);
+  background:var(--surface-2);
+  border-color:var(--line-strong);
+}
+
+.mode-head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:4px 8px;
+}
+
+.pill{
+  padding:2px 7px;
+  border-radius:6px;
+  border:1px solid var(--line);
+  color:var(--text);
+  font-family:var(--font-num);
+  font-size:11px;
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+
+.mode-text{
+  flex:1;
+  min-width:0;
+  display:grid;
+  gap:4px;
+}
+
+.mode-title{
+  font-size:17px;
+  font-weight:700;
+  letter-spacing:-.01em;
+}
+
+.mode-desc{
+  font-size:14px;
+  color:var(--muted);
+}
+
+/* La flecha es el destino del toque: un botón dentro de la tarjeta.
+   La del Modo Progresivo (el recomendado) va rellena para guiar. */
+.chevron{
+  flex:none;
+  width:32px;
+  height:32px;
+  padding:7px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  color:var(--text);
+  transition:transform var(--press), border-color .2s var(--ease);
+}
+
+.mode-card:active .chevron{
+  transform:translateX(3px);
+  border-color:var(--line-strong);
+}
+
+.mode-card[data-mode="progressive"] .chevron{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:var(--accent-ink);
+}
+
+.home-footer{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  align-items:center;
+  gap:0 12px;
+}
+
+.home-footer .link-btn{
+  width:auto;
+  padding:8px 0;
+}
+
+.sessions{
+  font-size:12px;
+  line-height:1;
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.sessions strong{
+  font-family:var(--font-num);
+  font-weight:700;
+  color:var(--text);
+}
+
+/* ---------- 7. Vistas de cronómetro ---------- */
+.timer{
+  --phase:var(--text);
+}
+
+.timer[data-phase="contraer"]{ --phase:var(--contract); }
+.timer[data-phase="relajar"]{  --phase:var(--relax); }
+.timer[data-phase="done"]{     --phase:var(--accent); }
+
+.topbar{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:8px;
+}
+
+.timer-title{
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:.01em;
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.chip{
+  justify-self:start;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  min-height:44px;
+  padding:0 14px 0 8px;
+  border-radius:22px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  font-size:14px;
+  font-weight:600;
+  transition:transform var(--press), background-color .2s var(--ease),
+             border-color .2s var(--ease), color .2s var(--ease);
+}
+
+.chip svg{
+  width:20px;
+  height:20px;
+}
+
+.chip:active{
+  transform:scale(.95);
+  background:var(--surface-2);
+  border-color:var(--line-strong);
+}
+
+.chip-icon{
+  justify-self:end;
+  width:44px;
+  padding:0;
+  justify-content:center;
+}
+
+.chip-icon .icon-sound-off{ display:none; }
+.chip-icon[aria-pressed="true"]{ color:var(--muted); }
+.chip-icon[aria-pressed="true"] .icon-sound-on{ display:none; }
+.chip-icon[aria-pressed="true"] .icon-sound-off{ display:block; }
+
+.session{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-top:clamp(8px, 2.5dvh, 28px);
+}
+
+.session-label{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+/* reloj: cifras de ancho fijo para que no "vibren" cada segundo */
+.session-time{
+  font-family:var(--font-num);
+  font-size:clamp(30px, 5.5dvh, 44px);
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;
+  line-height:1.15;
+}
+
+.stage{
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(6px, 2dvh, 22px);
+}
+
+.phase{
+  font-size:clamp(28px, min(10.5vw, 6.2dvh), 56px);
+  font-weight:800;
+  letter-spacing:.04em;
+  line-height:1.05;
+  text-align:center;
+  color:var(--phase);
+  transition:color .35s var(--ease);
+}
+
+/* textos de cierre ("¡COMPLETADO!") son más largos: una sola línea */
+.timer[data-phase="done"] .phase{
+  font-size:clamp(24px, min(8.5vw, 5.5dvh), 44px);
+  letter-spacing:.02em;
+  white-space:nowrap;
+}
+
+.ring{
+  --size:min(66vw, 36dvh, 320px);
+  position:relative;
+  flex:none;
+  width:var(--size);
+  height:var(--size);
+}
+
+/* esfera del reloj: disco mate dentro del anillo, sin brillos */
+.ring::before{
+  content:"";
+  position:absolute;
+  inset:9%;
+  border-radius:50%;
+  background:var(--surface);
+  border:1px solid var(--line);
+}
+
+.ring svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  transform:rotate(-90deg);
+}
+
+.ring-track{
+  stroke:var(--surface-2);
+  stroke-width:4;
+}
+
+.ring-progress{
+  stroke:var(--phase);
+  stroke-width:4;
+  stroke-linecap:butt;
+  stroke-dasharray:100;
+  stroke-dashoffset:0;
+  transition:stroke-dashoffset .1s linear, stroke .35s var(--ease);
+}
+
+.ring-center{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+.ring-count{
+  font-family:var(--font-num);
+  font-size:calc(var(--size) * .38);
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.04em;
+  line-height:1;
+}
+
+.ring-unit{
+  margin-top:2px;
+  font-size:clamp(10px, calc(var(--size) * .05), 13px);
+  font-weight:600;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+/* pulso breve en cada cambio de fase */
+.ring.pulse{
+  animation:pulse .5s var(--ease);
+}
+
+@keyframes pulse{
+  0%{   transform:scale(1.045); }
+  100%{ transform:scale(1); }
+}
+
+.sub{
+  min-height:1.4em;
+  font-size:14px;
+  font-variant-numeric:tabular-nums;
+  color:var(--muted);
+  text-align:center;
+}
+
+/* Chips de combinación / variante: solo en "PREPARADO" */
+.options{
+  display:none;
+}
+
+.timer[data-status="idle"][data-options] .options{
+  display:grid;
+  gap:6px;
+  padding-top:clamp(6px, 1.5dvh, 14px);
+}
+
+.timer[data-options="progressive"] .options{ grid-template-columns:repeat(5, 1fr); }
+.timer[data-options="special"] .options{     grid-template-columns:repeat(3, 1fr); }
+
+/* deja sitio a los chips reduciendo el anillo mientras se elige */
+.timer[data-status="idle"][data-options] .ring{
+  --size:min(60vw, 26dvh, 280px);
+}
+
+.option{
+  min-height:46px;
+  min-width:0;
+  padding:4px 2px;
+}
+
+.option strong{
+  font-size:15px;
+  line-height:1.15;
+}
+
+.option span{
+  font-size:10px;
+  font-weight:500;
+  line-height:1.2;
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.option span:empty{
+  display:none;
+}
+
+.option:disabled{
+  border-style:dashed;
+  color:var(--muted);
+  opacity:.55;
+  cursor:default;
+}
+
+.option:disabled:active{
+  transform:none;
+  background:transparent;
+}
+
+/* las variantes son nombres, no cifras: van en la fuente de texto */
+.timer[data-options="special"] .option strong{
+  font-family:var(--font-ui);
+  font-size:14px;
+}
+
+.timer[data-options="special"] .option span{
+  font-size:11px;
+}
+
+.controls{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:12px;
+  padding-top:clamp(8px, 2dvh, 20px);
+}
+
+/* En marcha, el color pertenece a la fase: "Pausar" pasa a neutro. */
+.timer[data-status="running"] .btn-primary{
+  background:var(--surface);
+  border-color:var(--line-strong);
+  color:var(--text);
+}
+
+.timer[data-status="running"] .btn-primary:active{
+  background:var(--surface-2);
+}
+
+/* ---------- 8. Guía de instalación ---------- */
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:10;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:16px;
+  background:rgba(5, 6, 7, .82);
+}
+
+.modal[hidden]{
+  display:none;
+}
+
+.modal-card{
+  width:360px;
+  max-width:100%;
+  max-height:100%;
+  overflow:auto;
+}
+
+.modal-card h2{
+  margin-bottom:12px;
+  font-size:19px;
+  font-weight:800;
+  letter-spacing:-.01em;
+  text-align:center;
+}
+
+.modal-card h3{
+  margin:16px 0 6px;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+.modal-card ol{
+  margin:0;
+  padding-left:20px;
+  font-size:14px;
+  line-height:1.5;
+  color:var(--text);
+}
+
+.modal-card ol ::marker{
+  font-family:var(--font-num);
+  font-weight:700;
+  color:var(--accent);
+}
+
+.modal-note{
+  margin:14px 0;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.modal-card .btn{
+  width:100%;
+}
+
+/* Guía: cabecera y botón fijos, solo el contenido se desplaza */
+.guide{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  width:440px;
+  max-height:min(100%, 720px);
+  padding:18px 20px 20px;
+  overflow:hidden;
+}
+
+.guide-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.guide-header h2{
+  margin:0;
+  text-align:left;
+}
+
+.guide-x{
+  flex:none;
+  width:44px;
+  height:44px;
+  margin:-6px -8px -6px 0;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:var(--muted);
+  transition:transform var(--press), background-color .2s var(--ease), color .2s var(--ease);
+}
+
+.guide-x svg{
+  width:20px;
+  height:20px;
+}
+
+.guide-x:active{
+  transform:scale(.92);
+  background:var(--surface-2);
+  color:var(--text);
+}
+
+.guide-body{
+  flex:1;
+  min-height:0;
+  margin:0 -20px;
+  padding:0 20px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  scrollbar-width:thin;
+  scrollbar-color:var(--line-strong) transparent;
+}
+
+.guide-body section{
+  padding:16px 0;
+  border-bottom:1px solid var(--line);
+}
+
+.guide-body h3{
+  margin:0 0 8px;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:-.01em;
+  text-transform:none;
+  color:var(--text);
+}
+
+.guide-body p,
+.guide-body li{
+  font-size:14px;
+  line-height:1.5;
+  color:var(--muted);
+}
+
+.guide-body strong{
+  font-weight:600;
+  color:var(--text);
+}
+
+.guide-body ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:10px;
+}
+
+.guide-body li{
+  padding-left:14px;
+  border-left:1px solid var(--line-strong);
+}
+
+.guide-body .guide-note{
+  padding:14px 0;
+  font-size:13px;
+}
+
+@media (hover:hover){
+  .guide-x:hover{
+    background:var(--surface-2);
+    color:var(--text);
+  }
+}
+
+/* ---------- 9. Ajustes por tamaño de pantalla ---------- */
+
+/* Dispositivos con puntero: respuesta al pasar el cursor */
+@media (hover:hover){
+  .mode-card:hover,
+  .btn-secondary:hover,
+  .chip:hover,
+  .duration:hover,
+  .option:not(:disabled):hover{
+    border-color:var(--line-strong);
+  }
+  .duration[aria-checked="true"]:hover,
+  .option[aria-checked="true"]:hover{
+    border-color:var(--accent);
+  }
+  .btn-primary:hover{
+    background:#e0f76a;
+  }
+  .timer[data-status="running"] .btn-primary:hover{
+    background:var(--surface-2);
+  }
+  .link-btn:hover{
+    color:var(--text);
+  }
+}
+
+/* Celulares muy pequeños (≤ 340px de ancho) */
+@media (max-width:340px){
+  .app{
+    padding-left:14px;
+    padding-right:14px;
+  }
+  .mode-title{ font-size:16px; }
+  .mode-desc{ font-size:13px; }
+  .btn{ font-size:16px; padding:0 12px; }
+  .chip span{ display:none; }
+  .chip{ width:44px; padding:0; justify-content:center; }
+}
+
+/* Pantallas de altura media (ej. 360×640) */
+@media (max-height:700px){
+  .home-header p{ display:none; }
+  .home{ gap:12px; }
+  .block-title{ margin-bottom:6px; }
+  .modes{ gap:8px; }
+  .mode-card{ padding-top:10px; padding-bottom:10px; }
+  .mode-desc{ font-size:13px; }
+}
+
+/* Pantallas bajas en vertical (ej. iPhone SE, 320×568) */
+@media (max-height:600px){
+  .btn{ min-height:52px; }
+  .home{ gap:8px; }
+  .home-header h1{ font-size:22px; }
+  .duration{ min-height:48px; }
+  .mode-card{ padding-top:6px; padding-bottom:6px; }
+  .level{ gap:3px; }
+  .block-title{ margin-bottom:4px; }
+}
+
+/* Celular en horizontal: cronómetro en dos columnas */
+@media (orientation:landscape) and (max-height:520px){
+  .app{
+    max-width:900px;
+  }
+
+  .timer{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto 1fr auto auto;
+    grid-template-areas:
+      "top     top"
+      "stage   session"
+      "stage   options"
+      "stage   controls";
+    column-gap:24px;
+  }
+  .timer[hidden]{ display:none; }
+
+  .topbar{   grid-area:top; }
+  .session{  grid-area:session; justify-content:center; margin-top:0; }
+  .stage{    grid-area:stage; gap:4px; }
+  .options{  grid-area:options; }
+  .controls{ grid-area:controls; padding-top:8px; }
+
+  .ring,
+  .timer[data-status="idle"][data-options] .ring{ --size:min(34vw, 46dvh); }
+  .phase{ font-size:clamp(22px, 9dvh, 40px); }
+  .sub{   font-size:13px; }
+  .option{ min-height:44px; }
+
+  .home{
+    gap:8px;
+  }
+  .home-header{
+    display:none;
+  }
+  .block-title{
+    margin-bottom:6px;
+  }
+  .modes{
+    grid-template-columns:repeat(3, 1fr);
+    gap:8px;
+  }
+  .mode-card{
+    padding-top:10px;
+    padding-bottom:10px;
+  }
+  .mode-title{ font-size:15px; }
+  .mode-desc{ font-size:12px; }
+  .chevron{
+    display:none;
+  }
+  .duration{
+    min-height:48px;
+    flex-direction:row;
+    gap:6px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .ring.pulse{ animation:none; }
+  *, *::before, *::after{ transition-duration:.01ms !important; }
+}

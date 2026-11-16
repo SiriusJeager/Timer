@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Kegel Timer</title>
+  <meta name="description" content="Cronómetro de ejercicios Kegel. Funciona sin internet.">
+
+  <!-- PWA (Android / Chrome) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0b0c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+
+  <!-- PWA (iPhone / Safari) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kegel">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+
+  <!-- Tipografía (archivos locales para que funcione sin internet) -->
+  <link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ============ Pantalla de bloqueo (clave de activación) ============ -->
+  <div id="lockScreen" class="lock">
+    <form id="lockForm" class="card lock-card" autocomplete="off">
+      <img src="icons/icon-192.png" alt="" class="lock-icon" width="72" height="72">
+      <h1>Kegel Timer</h1>
+      <p class="lock-text">Ingresa tu clave de activación para comenzar.</p>
+
+      <label for="activationCode">Clave de activación</label>
+      <input id="activationCode" type="text" inputmode="text" autocapitalize="characters"
+             autocorrect="off" spellcheck="false" placeholder="Ej: ABCD1234" required>
+      <div id="lockError" class="lock-error" role="alert"></div>
+
+      <button type="submit" class="btn btn-primary">Activar</button>
+
+      <p class="lock-hint">Encuentras tu clave en tu área de compras de Hotmart.</p>
+      <button type="button" class="link-btn install-link">¿Cómo instalar en mi celular?</button>
+    </form>
+  </div>
+
+  <!-- ============ Aplicación ============ -->
+  <main id="app" class="app">
+
+    <!-- Vista 1: Inicio / Configuración -->
+    <section id="view-home" class="view home">
+      <header class="home-header">
+        <h1>Kegel Timer</h1>
+        <p>Elige la duración y el modo de tu sesión.</p>
+      </header>
+
+      <div class="level">
+        <div class="level-text">
+          <strong id="levelName">Nivel 1 · Iniciante</strong>
+          <span id="levelProgress">0/5 sesiones para Nivel 2</span>
+        </div>
+        <div class="level-row">
+          <div id="levelBar" class="level-bar" role="progressbar" aria-labelledby="levelName" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="levelFill" class="level-fill"></div>
+          </div>
+          <span class="sessions"><strong id="sessions">0</strong> en total</span>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2 id="durationLabel" class="block-title">Duración de la sesión</h2>
+        <div id="durationPicker" class="durations" role="radiogroup" aria-labelledby="durationLabel">
+          <button type="button" class="duration" role="radio" data-minutes="1"><strong>1</strong><span>min</span></button>
+          <button type="button" class="duration" role="radio" data-minutes="2"><strong>2</strong><span>min</span></button>
+          <button type="button" class="duration" role="radio" data-minutes="3"><strong>3</strong><span>min</span></button>
+          <button type="button" class="duration" role="radio" data-minutes="4"><strong>4</strong><span>min</span></button>
+          <button type="button" class="duration" role="radio" data-minutes="5"><strong>5</strong><span>min</span></button>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2 class="block-title">Elige un modo para empezar</h2>
+        <div class="modes">
+          <button type="button" class="mode-card" data-mode="progressive">
+            <span class="mode-text">
+              <span class="mode-head">
+                <span class="mode-title">Modo Progresivo</span>
+                <span class="pill" data-pill="progressive"></span>
+              </span>
+              <span class="mode-desc">Ciclos constantes que suben de dificultad con tu nivel.</span>
+            </span>
+            <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          <button type="button" class="mode-card" data-mode="random">
+            <span class="mode-text">
+              <span class="mode-head">
+                <span class="mode-title">Modo Aleatorio</span>
+                <span class="pill" data-pill="random"></span>
+              </span>
+              <span class="mode-desc">Anti-habituación. Fases impredecibles que nunca se repiten.</span>
+            </span>
+            <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          <button type="button" class="mode-card" data-mode="special">
+            <span class="mode-text">
+              <span class="mode-head">
+                <span class="mode-title">Variantes Especiales</span>
+                <span class="pill" data-pill="special"></span>
+              </span>
+              <span class="mode-desc">Explosivo, Pirámide o Isométrico para estímulos específicos.</span>
+            </span>
+            <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <footer class="home-footer">
+        <button type="button" id="guideLink" class="link-btn">Guía: Músculos y Técnica</button>
+        <button type="button" class="link-btn install-link">¿Cómo instalar?</button>
+      </footer>
+    </section>
+
+    <!-- Las vistas de cronómetro (Progresivo, Aleatorio y Variantes) se crean
+         en script.js a partir de esta plantilla, una por cada modalidad. -->
+  </main>
+
+  <template id="timerTemplate">
+    <section class="view timer" data-phase="idle" hidden>
+      <header class="topbar">
+        <button type="button" class="chip" data-el="back">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+          <span>Inicio</span>
+        </button>
+        <h2 class="timer-title" data-el="title"></h2>
+        <button type="button" class="chip chip-icon" data-el="mute" aria-pressed="false">
+          <svg class="icon-sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>
+          <svg class="icon-sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/></svg>
+        </button>
+      </header>
+
+      <div class="session">
+        <span class="session-label">Tiempo restante</span>
+        <span class="session-time" data-el="remaining" role="timer">00:00</span>
+      </div>
+
+      <div class="stage">
+        <div class="phase" data-el="phase" aria-live="polite">PREPARADO</div>
+        <div class="ring" data-el="ring">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="ring-track" cx="50" cy="50" r="45"/>
+            <circle class="ring-progress" data-el="progress" cx="50" cy="50" r="45" pathLength="100"/>
+          </svg>
+          <div class="ring-center">
+            <span class="ring-count" data-el="count">3</span>
+            <span class="ring-unit" data-el="unit">segundos</span>
+          </div>
+        </div>
+        <div class="sub" data-el="sub"></div>
+      </div>
+
+      <!-- Selector de combinación / variante: solo visible en "PREPARADO" -->
+      <div class="options" data-el="options" role="radiogroup" aria-label="Opciones de la sesión"></div>
+
+      <div class="controls">
+        <button type="button" class="btn btn-primary" data-el="toggle">Iniciar</button>
+        <button type="button" class="btn btn-secondary" data-el="reset">Reiniciar</button>
+      </div>
+    </section>
+  </template>
+
+  <!-- ============ Guía rápida de instalación ============ -->
+  <div id="installModal" class="modal" hidden>
+    <div class="card modal-card" role="dialog" aria-modal="true" aria-labelledby="installTitle">
+      <h2 id="installTitle">Instalar en tu celular</h2>
+
+      <h3>Android (Chrome)</h3>
+      <ol>
+        <li>Abre esta página en <strong>Chrome</strong>.</li>
+        <li>Toca el menú <strong>⋮</strong> (arriba a la derecha).</li>
+        <li>Elige <strong>“Instalar app”</strong> o <strong>“Agregar a pantalla principal”</strong>.</li>
+      </ol>
+
+      <h3>iPhone (Safari)</h3>
+      <ol>
+        <li>Abre esta página en <strong>Safari</strong>.</li>
+        <li>Toca el botón <strong>Compartir</strong> (cuadro con flecha hacia arriba).</li>
+        <li>Elige <strong>“Agregar a inicio”</strong> y confirma.</li>
+      </ol>
+
+      <p class="modal-note">Después ábrela desde el icono de tu pantalla de inicio. Funciona sin internet. En iPhone, ingresa tu clave dentro de la app ya instalada.</p>
+
+      <button type="button" id="installClose" class="btn btn-primary">Entendido</button>
+    </div>
+  </div>
+
+  <!-- ============ Guía: Músculos y Técnica ============ -->
+  <div id="guideModal" class="modal" hidden>
+    <div class="card modal-card guide" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+      <header class="guide-header">
+        <h2 id="guideTitle">Músculos y Técnica</h2>
+        <button type="button" class="guide-x" data-guide-close aria-label="Cerrar guía">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+
+      <div id="guideBody" class="guide-body" tabindex="0">
+        <section>
+          <h3>¿Qué músculos estás entrenando?</h3>
+          <p>El suelo pélvico masculino es una hamaca muscular que va desde el pubis hasta el coxis. Los dos músculos clave son el <strong>Pubocoxígeo (PC)</strong> y el <strong>Bulbocavernoso</strong> (en la base del pene), encargados del soporte vesical y del control sexual.</p>
+        </section>
+
+        <section>
+          <h3>Cómo identificarlos en 5 segundos</h3>
+          <ul>
+            <li><strong>Prueba del chorro.</strong> Imagina que detienes la orina a mitad. Hazlo solo 1 vez para ubicarlos; nunca entrenes mientras orinas.</li>
+            <li><strong>Prueba de control.</strong> Aprieta como si evitaras soltar un gas. Notarás que la base del pene y los testículos se elevan ligeramente hacia adentro.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Beneficios clave para el hombre</h3>
+          <ul>
+            <li><strong>Control eyaculatorio.</strong> Mayor dominio sobre el reflejo antes del clímax.</li>
+            <li><strong>Calidad de erección.</strong> Mejora el bombeo y la retención de flujo sanguíneo en la base.</li>
+            <li><strong>Control urinario.</strong> Elimina el goteo post-micción y fortalece la zona pélvica.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>3 Reglas de Oro (errores a evitar)</h3>
+          <ul>
+            <li><strong>Cero tensión externa.</strong> No aprietes abdomen, glúteos ni muslos; el movimiento es 100% interno.</li>
+            <li><strong>Respira normal.</strong> Nunca aguantes la respiración durante la fase de CONTRAER.</li>
+            <li><strong>Constancia.</strong> Los resultados reales llegan tras 4 a 6 semanas de práctica constante.</li>
+          </ul>
+        </section>
+
+        <p class="guide-note">Esta guía es educativa y no sustituye el consejo médico. Si sientes dolor, consulta a un profesional de la salud.</p>
+      </div>
+
+      <button type="button" class="btn btn-primary" data-guide-close>Entendido</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
